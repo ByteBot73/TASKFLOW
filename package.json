@@ -19,6 +19,7 @@
   "homepage": "https://github.com/ByteBot73/TASKFLOW#readme",
   "description": "",
   "dependencies": {
+    "dotenv": "^16.5.0",
     "node-fetch": "^3.3.2"
   }
 }

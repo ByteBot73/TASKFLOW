@@ -695,14 +695,10 @@ if (!JWT_SECRET || typeof JWT_SECRET !== 'string' || JWT_SECRET.length < 32) { /
 // Discord OAuth Configuration (robustly check and set defaults/exit if critical)
 const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID;
 const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
-// IMPORTANT FIX: Use process.env.DISCORD_REDIRECT_URI if set on Render,
-// otherwise use your *actual deployed Render URL* as the default.
-const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI || 'https://taskfllow.onrender.com/api/discord/callback';
-const DISCORD_SCOPES = 'identify'; // We only need 'identify' for basic user info (Discord ID)
-
+const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI
+const DISCORD_SCOPES = 'identify'; 
 // NEW: Define the frontend URL for redirects after Discord OAuth
-// Use process.env.FRONTEND_URL if set on Render, otherwise your *actual deployed Render URL*
-const FRONTEND_URL = process.env.FRONTEND_URL || 'https://taskfllow.onrender.com';
+const FRONTEND_URL = process.env.FRONTEND_URL 
 
 
 if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET) {

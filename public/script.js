@@ -1015,8 +1015,7 @@
 
 
 // --- Global DOM Element References (cached for performance) ---
-const API_BASE_URL = 'http://localhost:3000/api';
-
+const API_BASE_URL = 'https://taskfllow.onrender.com/api';
 const authView = document.getElementById('auth-view');
 const boardView = document.getElementById('board-view');
 

@@ -1,0 +1,24 @@
+{
+  "name": "taskflow",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ByteBot73/TASKFLOW.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ByteBot73/TASKFLOW/issues"
+  },
+  "homepage": "https://github.com/ByteBot73/TASKFLOW#readme",
+  "description": "",
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  }
+}

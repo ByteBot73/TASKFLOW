@@ -271,648 +271,741 @@ header p {
 }
 .kanban-column-content::-webkit-scrollbar-thumb {
     background: hsl(250, 15%, 35%); /* Lighter thumb */
-    border-radius: 8px;
+    border-radius: 8px; /* More rounded thumb */
+    border: 2px solid hsl(250, 15%, 12%); /* Border to make it look inset */
 }
 .kanban-column-content::-webkit-scrollbar-thumb:hover {
-    background: hsl(250, 15%, 50%); /* Even lighter on hover */
-}
-/* Hide scrollbar for the main board container if not needed, as per previous request */
-.kanban-board-container::-webkit-scrollbar {
-    display: none;
-    width: 0;
-    height: 0;
-}
-.kanban-board-container {
-    -ms-overflow-style: none; /* For Internet Explorer/Edge */
-    scrollbar-width: none; /* For Firefox */
+    background: var(--color-accent-primary); /* Electric blue on hover */
 }
 
 
-/* --- Modal Overlay Styles (for Create/Edit and Confirmation) --- */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: hsla(250, 15%, 3%, 0.9); /* Slightly more opaque overlay */
-    justify-content: center;
+/* --- General Button Styles --- */
+.btn-primary, .btn-secondary, .btn-danger {
+    display: inline-flex;
     align-items: center;
+    justify-content: center;
+    padding: 0.8rem 1.5rem;
+    border-radius: 0.75rem; /* Rounded corners for buttons */
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 4px 10px hsla(0, 0%, 0%, 0.4);
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    min-width: 120px; /* Ensure a minimum width */
+    white-space: nowrap; /* Prevent text wrapping */
 }
 
-/* Modal states for animation */
-.modal.visible {
-    display: flex;
-    animation: fadeIn 0.3s forwards ease-out;
-}
-.modal.hidden-fade {
-    animation: fadeOut 0.3s forwards ease-in;
+.btn-primary {
+    background-image: linear-gradient(to right, var(--color-accent-gradient-start), var(--color-accent-gradient-end));
+    color: var(--color-dark-base); /* Dark text on bright background */
+    border: 1px solid var(--color-accent-primary);
+    text-shadow: 0 1px 2px hsla(0, 0%, 0%, 0.2);
 }
 
+.btn-primary:hover {
+    box-shadow: 0 6px 20px var(--color-accent-glow-primary);
+    transform: translateY(-2px) scale(1.02);
+    filter: brightness(1.1);
+}
 
-/* Modal Content Box Styles */
-.modal-content {
-    background-color: var(--color-dark-column);
-    padding: 2rem; /* More generous padding */
-    border-radius: 1.25rem; /* More rounded */
-    box-shadow: 0 10px 25px hsla(0, 0%, 0%, 0.8); /* Stronger shadow */
-    width: 95%;
-    max-width: 500px; /* Increased max-width */
-    position: relative;
-    border: 1px solid var(--color-dark-border);
+.btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px var(--color-accent-glow-primary);
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: var(--color-accent-primary); /* Electric blue text */
+    border: 1px solid var(--color-accent-primary);
+    box-shadow: none;
+}
+
+.btn-secondary:hover {
+    background-color: hsla(220, 80%, 65%, 0.1); /* Subtle blue background on hover */
     color: var(--color-light-text);
+    box-shadow: 0 0 10px var(--color-accent-glow-primary);
+    transform: translateY(-1px);
 }
 
-/* Close Button Styles within the Modal */
-.close-button {
-    position: absolute;
-    top: 0.8rem; /* Adjusted position */
-    right: 0.8rem;
-    font-size: 1.8rem; /* Larger icon */
+.btn-secondary:active {
+    transform: translateY(0);
+}
+
+.btn-danger {
+    background-color: hsl(0, 70%, 50%); /* Red for danger */
+    color: var(--color-light-text);
+    border: 1px solid hsl(0, 70%, 50%);
+}
+
+.btn-danger:hover {
+    background-color: hsl(0, 80%, 60%);
+    box-shadow: 0 4px 15px hsla(0, 80%, 60%, 0.6);
+    transform: translateY(-2px);
+}
+
+.btn-danger:active {
+    transform: translateY(0);
+}
+
+.btn-primary:disabled, .btn-secondary:disabled, .btn-danger:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(1);
+    box-shadow: none;
+    transform: none;
+}
+
+
+/* --- Fixed Position Buttons --- */
+.fixed-bottom-right {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    z-index: 999;
+}
+
+.fixed-top-right-group {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    z-index: 999;
+}
+
+.settings-icon-btn {
+    background: none;
+    border: none;
     cursor: pointer;
     color: var(--color-light-text-soft);
-    transition: color 0.2s ease-in-out;
+    transition: color 0.2s ease-in-out, transform 0.2s ease-in-out;
+    padding: 0.5rem;
+    border-radius: 50%;
+}
+
+.settings-icon-btn:hover {
+    color: var(--color-accent-primary);
+    transform: rotate(45deg);
+    box-shadow: 0 0 15px var(--color-accent-glow-primary); /* Subtle glow */
+}
+
+/* --- Modal Styles (Generic) --- */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: hsla(0, 0%, 0%, 0.7); /* Darker overlay */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.modal.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal.hidden-fade {
+    opacity: 0;
+    pointer-events: none; /* Disable interaction during fade-out */
+}
+
+.modal-content {
+    background-color: var(--color-dark-column); /* Use column background for modal */
+    padding: 2.5rem; /* Increased padding */
+    border-radius: 1rem; /* More rounded */
+    box-shadow: 0 10px 30px hsla(0, 0%, 0%, 0.9); /* Stronger shadow */
+    position: relative;
+    max-width: 90%;
+    width: 500px; /* Standard width for modals */
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    border: 1px solid var(--color-dark-border);
+    animation: fadeInScale 0.3s ease-out forwards;
+}
+
+.modal.hidden-fade .modal-content {
+    animation: fadeOutScale 0.3s ease-in forwards;
+}
+
+.modal-content h2 {
+    font-size: 1.8rem; /* Larger modal titles */
+    font-weight: 700;
+    color: var(--color-light-text);
+    margin-bottom: 0.8rem;
+    text-align: center;
+    text-shadow: 0 0 8px var(--color-accent-glow-primary);
+}
+
+.modal-content form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem; /* Consistent spacing in forms */
+}
+
+.modal-content label {
+    font-size: 0.9rem;
+    color: var(--color-light-text-soft);
+    margin-bottom: 0.2rem;
+    display: block;
+}
+
+.input-field {
+    width: 100%;
+    padding: 0.8rem 1rem; /* More padding */
+    border: 1px solid var(--color-dark-border-input);
+    border-radius: 0.5rem; /* Slightly more rounded */
+    background-color: var(--color-dark-input);
+    color: var(--color-light-text);
+    font-size: 1rem;
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    outline: none;
+}
+
+.input-field:focus {
+    border-color: var(--color-accent-primary);
+    box-shadow: 0 0 0 2px hsla(220, 80%, 65%, 0.3); /* Subtle blue glow */
+}
+
+.input-field::placeholder {
+    color: var(--color-subtle-text);
+}
+
+.message {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.8rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    opacity: 1; /* Default to visible */
+    transition: opacity 0.3s ease-in-out;
+}
+
+.message.hidden {
+    opacity: 0;
+    height: 0;
+    padding: 0;
+    overflow: hidden;
+    margin: 0;
+}
+
+.error-message {
+    background-color: hsla(0, 70%, 50%, 0.2);
+    color: hsl(0, 80%, 70%);
+    border: 1px solid hsl(0, 70%, 50%);
+}
+
+.success-message {
+    background-color: hsla(120, 70%, 40%, 0.2);
+    color: hsl(120, 80%, 70%);
+    border: 1px solid hsl(120, 70%, 40%);
+}
+
+.info-message {
+    background-color: hsla(210, 80%, 60%, 0.1);
+    color: hsl(210, 90%, 75%);
+    border: 1px solid hsl(210, 80%, 60%);
+}
+
+.close-button {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--color-subtle-text);
+    cursor: pointer;
+    transition: color 0.2s ease-in-out, transform 0.2s ease-in-out;
 }
 
 .close-button:hover {
     color: var(--color-light-text);
+    transform: rotate(90deg);
 }
 
-/* Modal Header and Form Field Labels */
-.modal-content h2 {
-    font-size: 2rem; /* Larger modal titles */
-    font-weight: 800;
-    color: var(--color-accent-primary); /* Uses primary accent (now blue) */
-    margin-bottom: 1.5rem; /* More space below */
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    text-shadow: 0 0 10px var(--color-accent-glow-primary); /* Uses primary glow (now blue) */
-}
 
-.modal-content label {
-    font-size: 1rem; /* Slightly larger label font */
-    font-weight: 600;
-    color: var(--color-light-text-soft);
-    margin-bottom: 0.4rem; /* More space below label */
-    display: block;
-}
-
-/* Input, Textarea, Select field styles within Modal */
-.input-field { /* Unified class for all main inputs */
-    width: 100%;
-    padding: 0.8rem 1rem; /* Increased padding */
-    margin-top: 0.3rem;
-    border: 1px solid var(--color-dark-border-input);
-    border-radius: 0.6rem; /* Consistent rounding */
-    background-color: var(--color-dark-input);
-    color: var(--color-light-text);
-    outline: none;
-    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    font-size: 0.95rem; /* Slightly larger font */
-}
-
-/* Input/Select Focus Animation */
-.input-field:focus {
-    border-color: var(--color-accent-primary); /* Uses primary accent (now blue) */
-    box-shadow: 0 0 0 4px hsla(220, 80%, 65%, 0.4); /* Stronger glow on focus (now blue) */
-}
-
-/* Primary Button Style (for submit buttons, add card/category buttons) */
-.btn-primary {
-    width: 100%;
-    padding: 1rem 1.5rem; /* More padding */
-    background: linear-gradient(45deg, var(--color-accent-gradient-start), var(--color-accent-gradient-end)); /* Uses blue gradient */
-    background-size: 200% auto;
-    color: var(--color-button-text);
-    font-weight: 800;
-    border-radius: 0.75rem; /* More rounded */
-    box-shadow: 0 5px 15px hsla(0, 0%, 0%, 0.5); /* Stronger shadow */
-    transition: background-position 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
-    font-size: 1.15rem; /* Slightly larger font */
-    text-transform: uppercase;
-    letter-spacing: 0.1em; /* More prominent letter spacing */
-    border: none;
-    cursor: pointer;
-}
-
-.btn-primary:hover {
-    background-position: right center;
-    transform: translateY(-3px) skewX(-1deg); /* More pronounced hover effect */
-    box-shadow: 0 8px 20px hsla(0, 0%, 0%, 0.7), 0 0 10px var(--color-accent-glow-primary); /* Uses primary glow (now blue) */
-}
-
-.btn-primary:disabled {
-    opacity: 0.4; /* More dimmed */
-    cursor: not-allowed;
-    background-image: none;
-    background-color: var(--color-dark-border);
-    box-shadow: none;
-    transform: none;
-}
-
-/* Secondary Button Style (for logout button, cancel action) */
-.btn-secondary {
-    background-color: var(--color-dark-border);
-    color: var(--color-light-text);
-    padding: 0.9rem 1.4rem;
-    border-radius: 0.6rem;
-    font-weight: 700;
-    font-size: 1rem;
-    text-transform: uppercase;
-    transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
-    border: none;
-    cursor: pointer;
-    box-shadow: 0 3px 8px hsla(0, 0%, 0%, 0.4);
-}
-
-.btn-secondary:hover {
-    background-color: hsl(250, 15%, 38%); /* Lighter on hover */
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px hsla(0, 0%, 0%, 0.6);
-}
-
-/* Danger Button Style (for delete actions) */
-.btn-danger {
-    background-color: hsl(0, 70%, 50%); /* Stronger red */
-    color: white;
-    padding: 0.9rem 1.4rem;
-    border-radius: 0.6rem;
-    font-weight: 700;
-    font-size: 1rem;
-    text-transform: uppercase;
-    transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
-    border: none;
-    cursor: pointer;
-    box-shadow: 0 3px 8px hsla(0, 0%, 0%, 0.4);
-}
-
-.btn-danger:hover {
-    background-color: hsl(0, 60%, 45%);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px hsla(0, 0%, 0%, 0.6);
-}
-
-/* Card Title and Description text colors */
-.card h3 {
-    color: var(--color-accent-primary); /* Uses primary accent (now blue) */
-    font-size: 1.1rem; /* Slightly larger card title */
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    text-shadow: 0 0 5px var(--color-accent-glow-primary); /* Uses primary glow (now blue) */
-}
-
-.card p {
-    color: var(--color-light-text-soft);
-    font-size: 0.9rem; /* Slightly larger description font */
-    line-height: 1.4;
-}
-
-/* Status message for app loading/errors */
-#app-status-message {
-    font-size: 0.95rem; /* Slightly larger status message */
-    color: var(--color-subtle-text);
-    margin: 1.5rem auto; /* Centered with more margin */
-    padding: 0.8rem 1.2rem;
-    background-color: var(--color-dark-column);
-    border-radius: 0.75rem;
-    border: 1px solid var(--color-dark-border);
-    display: inline-block; /* Allows auto width */
-    box-shadow: 0 4px 10px hsla(0, 0%, 0%, 0.3);
-    font-weight: 500;
-    animation: pulse-subtle 3s infinite ease-in-out;
-
-    opacity: 1;
-    transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
-    visibility: visible;
-}
-
-/* Fade out class for status message */
-#app-status-message.fade-out {
-    opacity: 0;
-    visibility: hidden;
-}
-
-/* --- Auth Form Specific Styles (MODERN REDO) --- */
+/* --- Auth View Specific Styles --- */
 .auth-container {
-    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 2rem; /* More overall padding */
-    box-sizing: border-box;
-    background: linear-gradient(135deg, hsl(250, 20%, 12%), hsl(220, 25%, 8%)); /* Deeper, richer background gradient (violet-blue) */
-    animation: backgroundShiftAuth 18s infinite alternate ease-in-out; /* Smoother, slower animation */
+    min-height: 100vh;
+    padding: 2rem;
 }
 
-/* Auth Box Styling */
 .auth-box {
-    background-color: var(--color-dark-column); /* Use column color for consistency */
-    padding: 3rem; /* Generous padding inside the box */
-    border-radius: 1.5rem; /* Very rounded corners */
-    box-shadow: 0 20px 40px hsla(0, 0%, 0%, 0.8), 0 0 30px hsla(220, 80%, 65%, 0.3); /* Intense shadow with stronger glow (now blue) */
-    width: 95%;
-    max-width: 480px; /* Slightly wider for a more substantial feel */
-    border: 2px solid var(--color-accent-glow-secondary); /* More prominent subtle border */
+    background-color: var(--color-dark-column); /* Similar to column for consistency */
+    padding: 3rem;
+    border-radius: 1rem;
+    box-shadow: 0 10px 30px hsla(0, 0%, 0%, 0.9);
+    width: 100%;
+    max-width: 400px;
     text-align: center;
-    transform: translateY(0);
-    animation: slideInFromTop 0.8s ease-out; /* Entry animation */
+    border: 1px solid var(--color-dark-border);
 }
 
 .auth-box h2 {
-    font-size: 3rem; /* Very large title */
-    font-weight: 900;
-    color: var(--color-accent-primary); /* Uses primary accent (now blue) */
-    margin-bottom: 2.5rem; /* Lots of space below title */
-    letter-spacing: 0.15em; /* Increased letter spacing */
-    text-transform: uppercase;
-    text-shadow: 0 0 15px var(--color-accent-glow-primary); /* Intense glow (now blue) */
-}
-
-.auth-box form div {
-    margin-bottom: 1.5rem; /* More spacing between form fields */
-    text-align: left;
-}
-
-.auth-box .auth-toggle-text {
-    font-size: 1rem;
-    color: var(--color-light-text-soft);
-    margin-top: 2rem; /* More space above toggle link */
-}
-
-.auth-box .auth-toggle-link {
-    color: var(--color-accent-primary); /* Uses primary accent (now blue) */
-    cursor: pointer;
-    text-decoration: none;
-    font-weight: 700; /* Bolder link */
-    transition: color 0.2s ease-in-out, text-shadow 0.2s ease-in-out;
-}
-
-.auth-box .auth-toggle-link:hover {
-    color: hsl(220, 80%, 75%); /* Lighter accent on hover (now blue) */
-    text-shadow: 0 0 8px var(--color-accent-glow-primary); /* Uses primary glow (now blue) */
-}
-
-.message {
-    font-size: 0.9rem; /* Slightly larger message font */
-    margin-top: 0.75rem;
-    text-align: center;
-    min-height: 1.5em; /* More space to prevent layout shift */
-    font-weight: 500;
-}
-
-.error-message {
-    color: hsl(0, 75%, 60%); /* Brighter red for errors */
-}
-
-.success-message {
-    color: hsl(220, 80%, 75%); /* Brighter blue for success (now blue) */
-}
-
-
-/* --- Confirmation Modal Specific Styles --- */
-.confirmation-modal-content {
-    max-width: 420px;
-    padding: 2rem;
-    text-align: center;
-}
-
-.confirmation-modal-content h2 {
-    font-size: 1.8rem;
-    margin-bottom: 1.2rem;
-}
-
-.confirmation-modal-content p {
-    font-size: 1.05rem;
-    color: var(--color-light-text-soft);
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--color-accent-primary);
     margin-bottom: 2rem;
+    text-shadow: 0 0 10px var(--color-accent-glow-primary);
 }
 
-.modal-actions {
+.auth-box form {
     display: flex;
-    justify-content: center;
-    gap: 1.25rem; /* Increased gap */
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.auth-toggle-text {
+    font-size: 0.9rem;
+    color: var(--color-light-text-soft);
     margin-top: 1.5rem;
 }
 
-.modal-actions .modal-btn {
-    flex: 1;
-    padding: 1rem 1.5rem; /* More padding */
-    border-radius: 0.6rem;
-    font-weight: 700;
-    font-size: 1rem;
-    text-transform: uppercase;
-    transition: all 0.2s ease-in-out;
-    border: none;
-    cursor: pointer;
-    box-shadow: 0 3px 8px hsla(0, 0%, 0%, 0.4);
+.auth-toggle-link {
+    color: var(--color-accent-primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease-in-out;
 }
 
-.modal-actions .confirm-btn {
-    background-color: hsl(0, 75%, 60%);
-    color: white;
-}
-
-.modal-actions .confirm-btn:hover {
-    background-color: hsl(0, 65%, 55%);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px hsla(0, 0%, 0%, 0.6);
-}
-
-.modal-actions .cancel-btn {
-    background-color: hsl(250, 15%, 28%);
+.auth-toggle-link:hover {
     color: var(--color-light-text);
+    text-decoration: underline;
 }
 
-.modal-actions .cancel-btn:hover {
-    background-color: hsl(250, 15%, 40%);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px hsla(0, 0%, 0%, 0.6);
+/* --- Settings Modal Specific Styles (NEW .settings-modal-content-new) --- */
+.settings-modal-content-new {
+    width: 90%;
+    max-width: 600px; /* Wider for tabs */
+    padding: 1.5rem;
+    gap: 1rem; /* Adjust gap for better layout */
 }
 
-
-/* --- Animations --- */
-@keyframes backgroundShift {
-    0% {
-        background-position: 0% 50%;
-    }
-    100% {
-        background-position: 100% 50%;
-    }
-}
-
-@keyframes backgroundShiftAuth {
-    0% {
-        background-position: 0% 50%;
-    }
-    100% {
-        background-position: 100% 50%;
-    }
-}
-
-@keyframes slideInFromTop {
-    from {
-        opacity: 0;
-        transform: translateY(-80px); /* Deeper slide */
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes pulse-btn {
-    0% {
-        box-shadow: 0 5px 15px hsla(0, 0%, 0%, 0.7);
-        transform: scale(1);
-    }
-    50% {
-        box-shadow: 0 8px 20px hsla(0, 0%, 0%, 0.9), 0 0 6px var(--color-accent-glow-primary); /* Uses primary glow (now blue) */
-        transform: scale(1.01);
-    }
-    100% {
-        box-shadow: 0 5px 15px hsla(0, 0%, 0%, 0.7);
-        transform: scale(1);
-    }
-}
-
-@keyframes pulse-subtle {
-    0%, 100% {
-        transform: scale(1);
-        box-shadow: 0 3px 8px hsla(0, 0%, 0%, 0.3);
-    }
-    50% {
-        transform: scale(1.005);
-        box-shadow: 0 4px 10px hsla(0, 0%, 0%, 0.4), 0 0 2px var(--color-subtle-text);
-    }
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes fadeOut {
-    from {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    to {
-        opacity: 0;
-        transform: translateY(-30px);
-    }
-}
-
-/* Fixed buttons (Add Card/Category) */
-.fixed-bottom-right {
-    position: fixed;
-    bottom: 1.5rem; /* Increased distance from bottom */
-    right: 1.5rem; /* Increased distance from right */
-    display: flex;
-    flex-direction: column;
-    gap: 1rem; /* More space between buttons */
-    align-items: flex-end;
-    z-index: 998;
-}
-.fixed-bottom-right .btn-primary {
-    width: auto;
-    padding: 1rem 1.8rem; /* Larger buttons */
-    font-size: 1.1rem; /* Larger font */
-    border-radius: 9999px; /* Pill shape */
-    box-shadow: 0 4px 12px hsla(0, 0%, 0%, 0.6); /* Stronger shadow */
-}
-.fixed-bottom-right .btn-primary:hover {
-    box-shadow: 0 6px 16px hsla(0, 0%, 0%, 0.8), 0 0 10px var(--color-accent-glow-primary); /* Uses primary glow (now blue) */
-}
-.fixed-bottom-right .btn-primary:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    background-color: var(--color-dark-border);
-    box-shadow: none;
-    transform: none;
-    background-image: none;
-}
-
-/* Fixed top-right group for logout and settings */
-.fixed-top-right-group {
-    position: fixed;
-    top: 1.5rem; /* Increased distance from top */
-    right: 1.5rem; /* Increased distance from right */
-    z-index: 999;
-    display: flex;
-    align-items: center;
-    gap: 0.8rem; /* More space between buttons */
-}
-.settings-icon-btn {
-    background: none; border: none; cursor: pointer; padding: 0.6rem; /* Slightly larger padding */
-    color: var(--color-light-text-soft); transition: color 0.2s ease-in-out, transform 0.2s ease-in-out;
-}
-.settings-icon-btn:hover {
-    color: var(--color-light-text); transform: rotate(45deg); /* More pronounced rotation */
-}
-.settings-icon-btn svg { width: 28px; height: 28px; display: block; } /* Larger icon */
-
-/* Delete Category Button inside Column Header */
-.delete-category-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: hsl(0, 70%, 60%); /* Red for delete */
-    padding: 0.2rem;
-    border-radius: 50%;
-    transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out;
-    flex-shrink: 0; /* Prevent button from shrinking */
-}
-.delete-category-btn:hover {
-    color: hsl(0, 80%, 70%);
-    background-color: hsla(0, 70%, 60%, 0.15); /* Light red background on hover */
-}
-.delete-category-btn svg {
-    width: 22px; /* Slightly larger delete icon */
-    height: 22px;
-}
-
-/* --- Settings Modal Specific Styles (REVISED with Tabs) --- */
-
-/* Adjusting modal-content for the tabbed layout */
-.modal-content.settings-modal-content-new {
-    max-width: 600px; /* Wider modal for tabs */
-    padding: 1.5rem; /* Slightly less padding to accommodate tabs */
-}
-
-.modal-content.settings-modal-content-new h2 {
-    margin-bottom: 1rem; /* Adjust heading margin for tabs */
+.settings-modal-content-new h2 {
+    margin-bottom: 1.5rem;
 }
 
 .tabs-container {
     display: flex;
     flex-direction: column;
-    margin-bottom: 1.5rem; /* Space between tabs and content */
-    border: 1px solid var(--color-dark-border); /* Outer border for the tab area */
-    border-radius: 0.75rem;
-    overflow: hidden; /* Ensures tabs and content stay within bounds */
-    box-shadow: 0 4px 10px hsla(0, 0%, 0%, 0.3);
+    gap: 1.5rem;
 }
 
 .tab-buttons {
     display: flex;
-    justify-content: space-around; /* Distribute buttons evenly */
-    background-color: hsl(250, 15%, 10%); /* Darker background for tab bar */
-    border-bottom: 1px solid var(--color-dark-border);
+    justify-content: center; /* Center the tab buttons */
+    background-color: var(--color-dark-input); /* Background for the tab buttons row */
+    border-radius: 0.75rem;
     padding: 0.5rem;
-    flex-wrap: wrap; /* Allow tabs to wrap on smaller screens */
-    gap: 0.2rem; /* Small gap between buttons */
+    gap: 0.5rem;
+    flex-wrap: wrap; /* Allow wrapping on small screens */
 }
 
 .tab-button {
-    flex-grow: 1; /* Allows buttons to expand */
-    padding: 0.8rem 1.2rem;
-    background: none;
-    border: none;
-    border-radius: 0.5rem; /* Rounded button corners */
+    flex: 1; /* Distribute space evenly */
+    min-width: 80px; /* Ensure buttons don't get too small */
+    padding: 0.7rem 1.2rem;
+    border: 1px solid transparent;
+    border-radius: 0.6rem;
+    background-color: transparent;
     color: var(--color-light-text-soft);
     font-size: 0.95rem;
-    font-weight: 600;
+    font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
+    transition: all 0.3s ease-in-out;
+    text-align: center;
 }
 
 .tab-button:hover:not(.active) {
-    background-color: hsla(250, 15%, 25%, 0.4); /* Lighter hover for non-active */
+    background-color: hsla(250, 15%, 25%, 0.4);
     color: var(--color-light-text);
 }
 
 .tab-button.active {
-    background: linear-gradient(90deg, hsl(250, 15%, 25%), hsl(260, 20%, 35%)); /* Active tab gradient (violet-blue) */
-    color: var(--color-accent-primary); /* Uses primary accent (now blue) */
-    box-shadow: inset 0 0 10px hsla(250, 15%, 25%, 0.5); /* Inner shadow for active state */
-    border: 1px solid var(--color-dark-border-input);
+    background-image: linear-gradient(to right, var(--color-accent-gradient-start), var(--color-accent-gradient-end));
+    color: var(--color-dark-base); /* Dark text for active tab */
+    box-shadow: 0 2px 8px var(--color-accent-glow-primary);
+    transform: translateY(-2px);
+    border-color: var(--color-accent-primary);
 }
-
 
 .tab-content {
-    padding: 1.5rem; /* Padding inside tab content */
-    background-color: hsl(250, 15%, 12%); /* Background for active content area */
-    border-radius: 0 0 0.75rem 0.75rem; /* Rounded bottom corners matching container */
-
-    /* NEW: Animation properties for fading in */
-    opacity: 0;
-    transform: translateY(10px); /* Slightly move down for a subtle slide-in effect */
-    transition: opacity 0.3s ease-out, transform 0.3s ease-out; /* Smooth transition */
-}
-
-.tab-content.hidden {
-    display: none; /* Keep hidden for elements not visible */
+    background-color: hsl(250, 15%, 15%); /* Slightly different background for content */
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-dark-border-input);
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out; /* For smooth transitions */
+    transform: translateX(10px); /* Initial state for animation */
+    opacity: 0; /* Initial state for animation */
 }
 
 .tab-content.active-tab-content {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(0); /* Final state for animation */
 }
-
 
 .tab-content h3 {
-    font-size: 1.5rem; /* Tab content headings */
-    font-weight: 700;
-    color: var(--color-accent-primary); /* Uses primary accent (now blue) */
-    margin-bottom: 1.2rem;
-    text-align: center;
-    text-shadow: 0 0 8px var(--color-accent-glow-primary); /* Uses primary glow (now blue) */
-}
-
-/* Specific styling for account info lines within tabs */
-.info-group {
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Center align info for cleaner look */
+    font-size: 1.4rem;
+    color: var(--color-accent-primary);
     margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px dashed hsla(0, 0%, 75%, 0.1); /* Subtle separator */
-}
-
-.info-group:last-of-type {
-    border-bottom: none; /* No border for the last info group */
-    margin-bottom: 0;
-    padding-bottom: 0;
+    font-weight: 600;
+    text-align: center;
+    text-shadow: 0 0 5px var(--color-accent-glow-primary);
 }
 
 .settings-info-line {
-    font-size: 1.05rem;
+    font-size: 1rem;
     color: var(--color-light-text-soft);
-    margin-bottom: 0.3rem; /* Tighter spacing in info group */
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed hsla(0, 0%, 100%, 0.1);
+    padding-bottom: 0.5rem;
 }
 
-/* Ensure buttons within tab content take full width and have proper top margin */
-.tab-content form .btn-primary,
-.tab-content .btn-primary {
-    margin-top: 1.5rem; /* Consistent spacing for buttons */
+.settings-info-line span {
+    color: var(--color-light-text);
+    font-weight: 500;
+    text-align: right; /* Align value to the right */
+    word-break: break-all; /* Break long IDs */
+}
+
+.settings-discord-status {
+    font-weight: 600;
+    padding: 0.8rem;
+    border-radius: 0.6rem;
+    border: 1px solid;
+    display: block; /* Make it a block element */
+}
+
+.text-green-400.settings-discord-status {
+    background-color: hsla(120, 70%, 40%, 0.2);
+    border-color: hsl(120, 70%, 40%);
+}
+
+.text-red-400.settings-discord-status {
+    background-color: hsla(0, 70%, 50%, 0.2);
+    border-color: hsl(0, 70%, 50%);
 }
 
 
-/* Specific text color for Discord status for better visibility (from JS logic) */
-.settings-discord-status.text-green-400 { /* Targeting class added by JS, now maps to blue */
-    color: hsl(220, 80%, 75%); /* Brighter blue for connected status */
-    text-shadow: 0 0 5px hsla(220, 80%, 65%, 0.3);
+/* --- Confirmation Modal Specific Styles --- */
+.confirmation-modal-content {
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    gap: 1.5rem;
 }
 
-.settings-discord-status.text-red-400 { /* Targeting class added by JS */
-    color: hsl(0, 70%, 60%); /* Brighter red for not connected status */
-    text-shadow: 0 0 5px hsla(0, 70%, 60%, 0.3);
+.confirmation-modal-content .modal-actions {
+    display: flex;
+    justify-content: space-around;
+    gap: 1rem;
 }
 
-/* Adjustments for the final logout button in the modal */
-#settings-logout-btn {
-    margin-top: 2rem; /* More space above the final logout button */
+.confirmation-modal-content .modal-btn {
+    flex: 1;
+    padding: 0.8rem 1.2rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.95rem;
 }
 
+.confirmation-modal-content .confirm-btn {
+    background-image: linear-gradient(to right, hsl(120, 70%, 45%), hsl(130, 75%, 55%));
+    color: var(--color-dark-base);
+    border: 1px solid hsl(120, 70%, 45%);
+}
+
+.confirmation-modal-content .confirm-btn:hover {
+    box-shadow: 0 4px 15px hsla(120, 70%, 45%, 0.6);
+    transform: translateY(-2px);
+}
+
+.confirmation-modal-content .cancel-btn {
+    background-color: transparent;
+    color: hsl(0, 80%, 70%);
+    border: 1px solid hsl(0, 70%, 50%);
+}
+
+.confirmation-modal-content .cancel-btn:hover {
+    background-color: hsla(0, 70%, 50%, 0.1);
+    box-shadow: 0 0 10px hsla(0, 70%, 50%, 0.4);
+    transform: translateY(-1px);
+}
+
+
+/* --- NEW ADMIN PANEL MODAL STYLES --- */
+.admin-modal-content {
+    width: 90%;
+    max-width: 700px; /* Wider for more content */
+    padding: 2rem;
+    gap: 1.5rem;
+}
+
+.admin-modal-content h2 {
+    margin-bottom: 1rem;
+}
+
+.admin-panel-step {
+    transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
+    opacity: 0;
+    transform: translateY(20px);
+    height: 0;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+}
+
+.admin-panel-step.active-admin-step {
+    opacity: 1;
+    transform: translateY(0);
+    height: auto; /* Allow content to dictate height */
+    padding: 1rem 0; /* Add back padding */
+    overflow: visible;
+    margin-top: 1rem;
+    border-top: 1px solid var(--color-dark-border); /* Separator */
+    padding-top: 1.5rem;
+}
+
+.admin-panel-step h3 {
+    font-size: 1.6rem;
+    color: var(--color-light-text);
+    margin-bottom: 1.2rem;
+    text-align: center;
+    text-shadow: 0 0 6px var(--color-accent-glow-secondary); /* More subtle glow */
+}
+
+.admin-action-section {
+    background-color: hsl(250, 15%, 15%); /* Slightly darker background for sections */
+    border: 1px solid var(--color-dark-border-input);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.admin-action-section h4 {
+    font-size: 1.25rem;
+    color: var(--color-accent-primary);
+    border-bottom: 1px solid hsla(220, 80%, 65%, 0.3);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.admin-data-list {
+    max-height: 250px; /* Scrollable area for categories/tasks */
+    overflow-y: auto;
+    background-color: hsl(250, 15%, 12%);
+    border: 1px solid var(--color-dark-border);
+    border-radius: 0.5rem;
+    padding: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+/* Style for individual items in admin lists */
+.admin-data-list > div {
+    background-color: var(--color-dark-card);
+    padding: 0.7rem 1rem;
+    border-radius: 0.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    border: 1px solid hsla(250, 15%, 25%, 0.5);
+}
+
+.admin-data-list > div span {
+    word-break: break-all;
+    margin-right: 0.5rem;
+}
+
+.admin-data-list > div button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-subtle-text);
+    transition: color 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.2rem;
+    border-radius: 4px;
+}
+.admin-data-list > div button:hover {
+    color: var(--color-light-text);
+    background-color: hsla(250, 15%, 30%, 0.4);
+}
+
+/* Admin panel specific inputs and buttons within sections */
+.admin-action-section form .input-field {
+    margin-bottom: 0.5rem; /* Adjust margin between input fields in admin forms */
+}
+.admin-action-section form .btn-secondary,
+.admin-action-section form .btn-danger {
+    margin-top: 0.5rem; /* Push button below inputs */
+}
+
+
+/* --- Utility Classes --- */
+.hidden {
+    display: none !important;
+}
+
+
+/* --- Animations --- */
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes fadeOutScale {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+}
+
+@keyframes backgroundShift {
+    0% { background-position: 0% 0%; }
+    50% { background-position: 100% 100%; }
+    100% { background-position: 0% 0%; }
+}
+
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 768px) {
+    .kanban-board-container {
+        flex-direction: column;
+        align-items: center;
+        overflow-x: hidden; /* Disable horizontal scrolling for mobile */
+        padding: 0.5rem;
+    }
+
+    .kanban-column {
+        width: 95%; /* Wider columns on mobile */
+        max-width: 95%;
+        margin-bottom: 1rem;
+        padding: 1rem;
+    }
+
+    .kanban-column-content {
+        max-height: 300px; /* Shorter scrollable area for mobile columns */
+    }
+
+    .fixed-bottom-right {
+        flex-direction: row;
+        bottom: 1rem;
+        right: 1rem;
+        left: 1rem;
+        justify-content: space-around;
+        gap: 0.5rem;
+        width: auto;
+    }
+    .fixed-bottom-right button {
+        flex: 1;
+        padding: 0.6rem 0.8rem;
+        font-size: 0.85rem;
+        min-width: unset;
+    }
+    .fixed-bottom-right button svg {
+        display: none; /* Hide icons on tiny screens if space is tight */
+    }
+
+    .fixed-top-right-group {
+        top: 0.8rem;
+        right: 0.8rem;
+        gap: 0.5rem;
+    }
+
+    .btn-secondary {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+    .settings-icon-btn svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .modal-content {
+        width: 95%;
+        padding: 1.5rem;
+    }
+    .settings-modal-content-new {
+        max-width: 95%;
+        padding: 1rem;
+    }
+    .settings-modal-content-new h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    .tab-buttons {
+        flex-direction: column; /* Stack tabs vertically on small screens */
+        padding: 0.25rem;
+        gap: 0.25rem;
+    }
+    .tab-button {
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+    }
+    .tab-content {
+        padding: 1rem;
+    }
+    .tab-content h3 {
+        font-size: 1.2rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .admin-modal-content {
+        max-width: 95%;
+        padding: 1.5rem;
+    }
+    .admin-panel-step h3 {
+        font-size: 1.3rem;
+    }
+    .admin-action-section {
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+    .admin-action-section h4 {
+        font-size: 1.1rem;
+    }
+    .admin-data-list {
+        max-height: 200px; /* Adjust height for mobile */
+    }
+}

@@ -2586,7 +2586,6 @@
 //     console.log('DOMContentLoaded: Initialization complete.');
 // });
 
-
 // --- Global DOM Element References (cached for performance) ---
 const API_BASE_URL = 'https://taskfllow.onrender.com/api'; // Your deployed Render backend API URL
 
@@ -2604,7 +2603,7 @@ const authMessage = document.getElementById('auth-message');
 const welcomeUsernameSpan = document.getElementById('welcome-username');
 const logoutBtn = document.getElementById('logout-btn');
 const settingsBtn = document.getElementById('settings-btn');
-const appStatusMessage = document.getElementById('app-status-message');
+const appStatusMessage = document.getElementById('app-status-message'); // This element needs .message class in HTML
 
 const kanbanBoardContainer = document.getElementById('kanban-board-container');
 const addCardBtn = document.getElementById('add-card-btn');
@@ -2760,6 +2759,8 @@ function removeAuthToken() {
  */
 function showMessage(element, message, type = 'error', duration = 3000) {
     element.textContent = message;
+    // Ensure 'message' class is always present for styling/transitions
+    element.classList.add('message');
     element.classList.remove('hidden', 'error-message', 'success-message', 'info-message'); // Clear previous types
     if (type === 'error') {
         element.classList.add('error-message');
@@ -3287,10 +3288,10 @@ function createCardElement(cardData) {
  */
 function showAppStatusMessage(message, type = 'info', duration = 3000) {
     appStatusMessage.textContent = message;
-    // Remove all previous type-specific classes, but keep base classes like 'message'
+    // Ensure `message` class is present for transitions (it's set in HTML, but being safe)
+    appStatusMessage.classList.add('message');
+    // Clear previous type-specific classes
     appStatusMessage.classList.remove('hidden', 'error-message', 'success-message', 'info-message');
-    // Ensure base styling classes are always present (defensive coding)
-    appStatusMessage.classList.add('text-center', 'p-3', 'rounded-lg', 'mb-4');
 
     // Add new type-specific class
     if (type === 'error') {
@@ -3302,11 +3303,11 @@ function showAppStatusMessage(message, type = 'info', duration = 3000) {
     }
 
     appStatusMessage.style.opacity = '1'; // Ensure it starts fully opaque
-    // The CSS defines the transition property on the `.message` class already.
+    // No need to set transition here, it's defined in CSS on the .message class.
 
     if (duration > 0) {
         setTimeout(() => {
-            appStatusMessage.style.opacity = '0'; // Trigger fade out
+            appStatusMessage.style.opacity = '0'; // Trigger fade out by changing opacity
             // Add a one-time listener to completely hide the element after the transition ends
             appStatusMessage.addEventListener('transitionend', function handler() {
                 appStatusMessage.classList.add('hidden');
@@ -3493,14 +3494,13 @@ function showCardOptionsMenu(cardData, buttonElement) {
         hideCardOptionsMenu();
     };
 
-    // Use requestAnimationFrame AND a small timeout to ensure the DOM updates and
-    // the current click event completely finishes its cycle before adding the listener.
-    requestAnimationFrame(() => {
-        setTimeout(() => {
-            document.addEventListener('click', handleClickOutsideCardOptionsMenu, { capture: true });
-            console.log('showCardOptionsMenu: Document click listener for hiding menu attached.'); // Debug log
-        }, 50); // A small delay (e.g., 50ms) can sometimes be necessary in race conditions.
-    });
+    // Use a small timeout to allow the browser to complete the current click event's cycle
+    // before attaching the document-wide listener for clicks outside the menu.
+    // This is a common pattern to avoid the "flicker" on menu open.
+    setTimeout(() => {
+        document.addEventListener('click', handleClickOutsideCardOptionsMenu, { capture: true });
+        console.log('showCardOptionsMenu: Document click listener for hiding menu attached.'); // Debug log
+    }, 100); // Increased delay slightly for more robustness
 }
 
 function hideCardOptionsMenu() {
@@ -3514,16 +3514,12 @@ function hideCardOptionsMenu() {
 }
 
 function handleClickOutsideCardOptionsMenu(event) {
-    // Check if the click occurred inside the menu itself OR on the button that opened it.
-    // If it did, we don't want to hide the menu, as that's an intentional interaction.
+    // If the click occurred inside the menu itself OR on the button that opened it, do nothing (don't hide)
     if (
         cardOptionsMenu.contains(event.target) ||
         (activeCardOptionsMenuButton && activeCardOptionsMenuButton.contains(event.target))
     ) {
-        // If the click was on the button that opened it, we might need special handling
-        // if the button itself also toggles the menu (but our current flow hides then shows).
-        // For now, simply return and don't hide.
-        return;
+        return; // Do nothing, let the click continue its normal course
     }
     // If the click was outside both the menu and its opening button, then hide the menu.
     hideCardOptionsMenu();
@@ -3535,8 +3531,9 @@ function handleClickOutsideCardOptionsMenu(event) {
 let draggedCardElement = null;
 
 function handleDragStart(event) {
+    // Prevent drag event from starting if the click was on the options button
     if (event.target.closest('.options-btn')) {
-        event.preventDefault(); // Prevent drag if clicking options button
+        event.preventDefault();
         return;
     }
     draggedCardElement = event.currentTarget;

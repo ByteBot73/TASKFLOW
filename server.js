@@ -273,7 +273,6 @@ app.put('/api/profile/password', authenticateToken, async (req, res) => {
     }
 });
 
-// Endpoint to explicitly link Discord ID to the currently authenticated Kanban user
 app.post('/api/profile/link-discord', authenticateToken, async (req, res) => {
     try {
         const { discordId, discordUsername, discordDiscriminator } = req.body;
@@ -281,15 +280,14 @@ app.post('/api/profile/link-discord', authenticateToken, async (req, res) => {
             return res.status(400).json({ message: 'Discord ID, username, and discriminator are required for linking.' });
         }
 
-        // Check if this Discord ID is already linked to another Kanban user
         const existingUserWithDiscordId = await User.findOne({ discordId: discordId });
         if (existingUserWithDiscordId && existingUserWithDiscordId._id.toString() !== req.user.userId) {
-            return res.status(409).json({ message: 'This Discord account is already linked to another Kanban user.' });
+            return res.status(409).json({ message: 'This Discord account is already linked to another TaskFlow user.' });
         }
 
         const user = await User.findById(req.user.userId);
         if (!user) {
-            return res.status(404).json({ message: 'Kanban user not found.' });
+            return res.status(404).json({ message: 'TaskFlow user not found.' });
         }
 
         user.discordId = discordId;
@@ -326,8 +324,7 @@ app.get('/api/discord/login', authenticateToken, (req, res) => {
     if (!DISCORD_CLIENT_ID || !DISCORD_REDIRECT_URI || !DISCORD_SCOPES) {
         return res.status(500).json({ message: "Discord API credentials or scopes not configured on server." });
     }
-    // Pass the Kanban user's ID as a state parameter
-    const state = req.user.userId; // This is the Kanban user ID
+    const state = req.user.userId; 
     const discordAuthUrl = `https://discord.com/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(DISCORD_REDIRECT_URI)}&response_type=code&scope=${encodeURIComponent(DISCORD_SCOPES)}&state=${encodeURIComponent(state)}`;
     res.json({ redirectUrl: discordAuthUrl });
 });
@@ -395,11 +392,10 @@ app.get('/api/discord/callback', async (req, res) => {
         const discordUsername = discordUser.username; // Get Discord username
         const discordDiscriminator = discordUser.discriminator; // Get Discord discriminator
 
-        // Now, attempt to link this Discord ID to the Kanban user who initiated the flow (from 'state')
         let kanbanUserIdFromState = null;
         if (state) {
             try {
-                kanbanUserIdFromState = decodeURIComponent(state); // Kanban userId passed as state
+                kanbanUserIdFromState = decodeURIComponent(state); 
             } catch (e) {
                 console.warn('Could not decode state parameter:', e);
             }

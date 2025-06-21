@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaskFlow Kanban Board</title>
+    <title>TaskFlow Board</title>
     <!-- Favicon: Using a simple SVG emoji -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✅</text></svg>">
     <!-- Tailwind CSS CDN -->
@@ -46,7 +46,6 @@
             </div>
         </div>
 
-        <!-- Kanban Board View (Hidden initially, shown after login) -->
         <div id="board-view" class="hidden p-4 min-h-screen flex flex-col">
             <header class="text-center mb-6 relative">
                 <h1 class="text-4xl font-extrabold text-white mb-2 tracking-wide drop-shadow-lg">
@@ -69,7 +68,6 @@
             <p id="app-status-message" class="text-center p-3 rounded-lg mb-4 hidden"></p>
 
             <div id="kanban-board-container" class="kanban-board-container flex-grow">
-                <!-- Kanban columns and cards will be rendered here by script.js -->
             </div>
 
             <!-- Fixed Action Buttons -->

@@ -2586,6 +2586,7 @@
 //     console.log('DOMContentLoaded: Initialization complete.');
 // });
 
+
 // --- Global DOM Element References (cached for performance) ---
 const API_BASE_URL = 'https://taskfllow.onrender.com/api'; // Your deployed Render backend API URL
 
@@ -3271,6 +3272,7 @@ function createCardElement(cardData) {
         // Crucial fix: stop immediate propagation of this click event.
         // This prevents the document-wide listener from also catching this click and closing the menu.
         e.stopPropagation();
+        console.log("STOPPED PROPAGATION for options button click."); // Debug log
         showCardOptionsMenu(cardData, optionsButton);
     });
 
@@ -3285,33 +3287,36 @@ function createCardElement(cardData) {
  */
 function showAppStatusMessage(message, type = 'info', duration = 3000) {
     appStatusMessage.textContent = message;
-    // Reset classes to ensure proper transition re-application
-    appStatusMessage.className = `text-center p-3 rounded-lg mb-4`;
+    // Remove all previous type-specific classes, but keep base classes like 'message'
+    appStatusMessage.classList.remove('hidden', 'error-message', 'success-message', 'info-message');
+    // Ensure base styling classes are always present (defensive coding)
+    appStatusMessage.classList.add('text-center', 'p-3', 'rounded-lg', 'mb-4');
+
+    // Add new type-specific class
     if (type === 'error') {
-        appStatusMessage.classList.add('bg-red-700', 'text-white');
+        appStatusMessage.classList.add('error-message');
     } else if (type === 'success') {
-        appStatusMessage.classList.add('bg-green-700', 'text-white');
+        appStatusMessage.classList.add('success-message');
     } else {
-        appStatusMessage.classList.add('bg-blue-700', 'text-white');
+        appStatusMessage.classList.add('info-message');
     }
-    // Ensure it's visible initially and has opacity 1 for transition to work
-    appStatusMessage.classList.remove('hidden');
-    appStatusMessage.style.opacity = '1';
-    appStatusMessage.style.transition = 'opacity 0.5s ease-in-out'; // Explicitly set transition for dynamic changes
+
+    appStatusMessage.style.opacity = '1'; // Ensure it starts fully opaque
+    // The CSS defines the transition property on the `.message` class already.
 
     if (duration > 0) {
         setTimeout(() => {
-            appStatusMessage.style.opacity = '0'; // Start fade out
-            // Once transition ends, hide it completely
+            appStatusMessage.style.opacity = '0'; // Trigger fade out
+            // Add a one-time listener to completely hide the element after the transition ends
             appStatusMessage.addEventListener('transitionend', function handler() {
                 appStatusMessage.classList.add('hidden');
-                appStatusMessage.removeEventListener('transitionend', handler);
-                appStatusMessage.style.transition = ''; // Clean up transition style
+                appStatusMessage.removeEventListener('transitionend', handler); // Clean up
             }, { once: true });
         }, duration);
     }
     console.log(`showAppStatusMessage: Message displayed - ${message} (Type: ${type})`);
 }
+
 
 function updateAddCardButtonState() {
     console.log('updateAddCardButtonState: Updating add card button state.');
@@ -3488,12 +3493,14 @@ function showCardOptionsMenu(cardData, buttonElement) {
         hideCardOptionsMenu();
     };
 
-    // Add a delayed event listener to the document to close the menu
-    // This delay prevents the *current* click (that opened the menu) from closing it immediately.
-    // The 'capture: true' ensures it catches the event during the capture phase, before bubbling.
-    setTimeout(() => {
-        document.addEventListener('click', handleClickOutsideCardOptionsMenu, { capture: true });
-    }, 0);
+    // Use requestAnimationFrame AND a small timeout to ensure the DOM updates and
+    // the current click event completely finishes its cycle before adding the listener.
+    requestAnimationFrame(() => {
+        setTimeout(() => {
+            document.addEventListener('click', handleClickOutsideCardOptionsMenu, { capture: true });
+            console.log('showCardOptionsMenu: Document click listener for hiding menu attached.'); // Debug log
+        }, 50); // A small delay (e.g., 50ms) can sometimes be necessary in race conditions.
+    });
 }
 
 function hideCardOptionsMenu() {
@@ -3501,6 +3508,7 @@ function hideCardOptionsMenu() {
     cardOptionsMenu.classList.remove('show');
     // Remove the listener when the menu is hidden to prevent unnecessary checks
     document.removeEventListener('click', handleClickOutsideCardOptionsMenu, { capture: true });
+    console.log('hideCardOptionsMenu: Document click listener for hiding menu removed.'); // Debug log
     activeCardOptionsMenuButton = null;
     currentEditingCardId = null;
 }
@@ -3512,7 +3520,10 @@ function handleClickOutsideCardOptionsMenu(event) {
         cardOptionsMenu.contains(event.target) ||
         (activeCardOptionsMenuButton && activeCardOptionsMenuButton.contains(event.target))
     ) {
-        return; // Do nothing, let the click continue its normal course
+        // If the click was on the button that opened it, we might need special handling
+        // if the button itself also toggles the menu (but our current flow hides then shows).
+        // For now, simply return and don't hide.
+        return;
     }
     // If the click was outside both the menu and its opening button, then hide the menu.
     hideCardOptionsMenu();
@@ -3900,7 +3911,8 @@ async function handleAdminAddTask(event) {
         adminAddTaskTitleInput.value = '';
         adminAddTaskDescInput.value = '';
         await loadAdminManagedUserCards(); // Refresh list
-    } catch (error) {
+    }
+    catch (error) {
         console.error('handleAdminAddTask: Error adding task:', error);
         showMessage(adminTasksMessage, error.message, 'error');
     }
@@ -4137,8 +4149,8 @@ document.addEventListener('DOMContentLoaded', () => {
     checkAuthAndRender();
 
     // The document-wide click listener for hiding the card options menu is now
-    // added/removed dynamically in showCardOptionsMenu/hideCardOptionsMenu functions.
-    // It is no longer added here statically on DOMContentLoaded.
+    // managed dynamically by showCardOptionsMenu/hideCardOptionsMenu functions.
+    // It is NOT added here statically on DOMContentLoaded.
 
     console.log('DOMContentLoaded: Initialization complete.');
 });

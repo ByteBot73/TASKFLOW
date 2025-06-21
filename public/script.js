@@ -3182,6 +3182,7 @@ async function fetchCategoriesAndCards() {
 
         renderKanbanBoard();
         updateAddCardButtonState();
+        // The success message will now fade out correctly after a brief delay
         showAppStatusMessage('Board loaded successfully.', 'success');
     } catch (error) {
         console.error('fetchCategoriesAndCards: Error loading board data:', error);
@@ -3267,7 +3268,9 @@ function createCardElement(cardData) {
 
     const optionsButton = card.querySelector('.options-btn');
     optionsButton.addEventListener('click', (e) => {
-        e.stopPropagation(); // <--- THIS IS THE FIX: Stop the click from propagating!
+        // Crucial fix: stop immediate propagation of this click event.
+        // This prevents the document-wide listener from also catching this click and closing the menu.
+        e.stopPropagation();
         showCardOptionsMenu(cardData, optionsButton);
     });
 
@@ -3278,10 +3281,11 @@ function createCardElement(cardData) {
  * Shows the main app status message at the top of the board.
  * @param {string} message
  * @param {string} type - 'success', 'error', 'info'
- * @param {number} [duration=3000] - Duration in ms, 0 for permanent
+ * @param {number} [duration=3000] - Duration in ms, 0 for persistent.
  */
 function showAppStatusMessage(message, type = 'info', duration = 3000) {
     appStatusMessage.textContent = message;
+    // Reset classes to ensure proper transition re-application
     appStatusMessage.className = `text-center p-3 rounded-lg mb-4`;
     if (type === 'error') {
         appStatusMessage.classList.add('bg-red-700', 'text-white');
@@ -3290,15 +3294,19 @@ function showAppStatusMessage(message, type = 'info', duration = 3000) {
     } else {
         appStatusMessage.classList.add('bg-blue-700', 'text-white');
     }
-    appStatusMessage.classList.remove('hidden', 'fade-out');
+    // Ensure it's visible initially and has opacity 1 for transition to work
+    appStatusMessage.classList.remove('hidden');
     appStatusMessage.style.opacity = '1';
+    appStatusMessage.style.transition = 'opacity 0.5s ease-in-out'; // Explicitly set transition for dynamic changes
 
     if (duration > 0) {
         setTimeout(() => {
-            appStatusMessage.classList.add('fade-out');
+            appStatusMessage.style.opacity = '0'; // Start fade out
+            // Once transition ends, hide it completely
             appStatusMessage.addEventListener('transitionend', function handler() {
                 appStatusMessage.classList.add('hidden');
                 appStatusMessage.removeEventListener('transitionend', handler);
+                appStatusMessage.style.transition = ''; // Clean up transition style
             }, { once: true });
         }, duration);
     }
@@ -3481,7 +3489,8 @@ function showCardOptionsMenu(cardData, buttonElement) {
     };
 
     // Add a delayed event listener to the document to close the menu
-    // This delay prevents the *current* click (that opened the menu) from closing it immediately
+    // This delay prevents the *current* click (that opened the menu) from closing it immediately.
+    // The 'capture: true' ensures it catches the event during the capture phase, before bubbling.
     setTimeout(() => {
         document.addEventListener('click', handleClickOutsideCardOptionsMenu, { capture: true });
     }, 0);
@@ -3490,20 +3499,22 @@ function showCardOptionsMenu(cardData, buttonElement) {
 function hideCardOptionsMenu() {
     console.log('hideCardOptionsMenu: Hiding card options menu.');
     cardOptionsMenu.classList.remove('show');
+    // Remove the listener when the menu is hidden to prevent unnecessary checks
     document.removeEventListener('click', handleClickOutsideCardOptionsMenu, { capture: true });
     activeCardOptionsMenuButton = null;
     currentEditingCardId = null;
 }
 
 function handleClickOutsideCardOptionsMenu(event) {
-    // If the click is inside the options menu OR on the button that opened it, do nothing (don't hide)
+    // Check if the click occurred inside the menu itself OR on the button that opened it.
+    // If it did, we don't want to hide the menu, as that's an intentional interaction.
     if (
         cardOptionsMenu.contains(event.target) ||
         (activeCardOptionsMenuButton && activeCardOptionsMenuButton.contains(event.target))
     ) {
-        return;
+        return; // Do nothing, let the click continue its normal course
     }
-    // Otherwise, hide the menu
+    // If the click was outside both the menu and its opening button, then hide the menu.
     hideCardOptionsMenu();
 }
 
@@ -3651,7 +3662,8 @@ async function handleAdminEnterUserId() {
         adminManagedUsername.textContent = adminManagedUser.username;
         adminManagedUserId.textContent = adminManagedUser._id;
         adminManagedDiscordId.textContent = adminManagedUser.discordId || 'N/A';
-        adminManagedDiscordUsername.textContent = adminManagedUser.discordUsername ? `${adminManagedUser.discordUsername}#${adminManagedUser.discordDiscriminator || 'XXXX'}` : 'N/A'; // Corrected discriminator access
+        // Note: The backend profile endpoint sends 'discordDiscriminator'. Ensure it's correctly used.
+        adminManagedDiscordUsername.textContent = adminManagedUser.discordUsername ? `${adminManagedUser.discordUsername}#${adminManagedUser.discordDiscriminator || 'XXXX'}` : 'N/A';
 
         // Clear messages for admin step 2 forms
         showMessage(adminStep2Message, '', 'hidden', 0);
@@ -4124,17 +4136,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initial check on load to determine which view to show
     checkAuthAndRender();
 
-    // Listener for clicks anywhere on the document to hide the options menu
-    document.addEventListener('click', (event) => {
-        const target = event.target;
-        const isClickInsideMenu = cardOptionsMenu.contains(target);
-        // Do NOT use activeCardOptionsMenuButton.contains(target) here for the root document listener,
-        // as the initial click on the button is what opened the menu.
-        // We already stopped propagation on the optionsButton click, so the initial click won't reach here.
-        // This listener is for subsequent clicks *away* from the menu.
-        if (cardOptionsMenu.classList.contains('show') && !isClickInsideMenu) {
-            hideCardOptionsMenu();
-        }
-    });
+    // The document-wide click listener for hiding the card options menu is now
+    // added/removed dynamically in showCardOptionsMenu/hideCardOptionsMenu functions.
+    // It is no longer added here statically on DOMContentLoaded.
+
     console.log('DOMContentLoaded: Initialization complete.');
 });

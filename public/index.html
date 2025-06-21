@@ -3,285 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaskFlow Kanban</title>
+    <title>TaskFlow Kanban Board</title>
+    <!-- Favicon: Using a simple SVG emoji -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✅</text></svg>">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Inter Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- Custom CSS -->
+    <!-- Link to your custom CSS (THIS MUST BE LAST to allow it to override/extend Tailwind or any default browser styles) -->
     <link rel="stylesheet" href="style.css">
-    <!-- Favicon (optional) -->
-    <link rel="icon" type="image/png" href="https://placehold.co/32x32/1a202c/ffffff?text=TF">
 </head>
-<body class="flex flex-col min-h-screen">
+<body>
+    <div id="app-root" class="min-h-screen flex flex-col">
+        <!-- Main application container. Content will be injected/managed by script.js -->
 
-    <!-- Authentication View -->
-    <main id="auth-view" class="auth-container hidden">
-        <div class="auth-box">
-            <h2 id="auth-title">Login</h2>
-            <form id="auth-form">
-                <div>
-                    <label for="auth-username" class="input-label">Username</label>
-                    <input type="text" id="auth-username" required class="input-field" autocomplete="username">
-                </div>
-                <div>
-                    <label for="auth-password" class="input-label">Password</label>
-                    <input type="password" id="auth-password" required class="input-field" autocomplete="current-password">
-                </div>
-                <button type="submit" id="auth-submit-btn" class="btn-primary mt-6">Login</button>
-                <p id="auth-message" class="message mt-4 hidden"></p>
-                <p class="auth-toggle-text">
-                    Don't have an account? <a href="#" id="auth-toggle-link" class="auth-toggle-link">Register here.</a>
+        <!-- Authentication View (Login/Register) -->
+        <!-- These classes are now fully managed by style.css for consistent appearance -->
+        <div id="auth-view" class="auth-container">
+            <div class="auth-box">
+                <!-- H2 styling is managed by .auth-box h2 in style.css -->
+                <h2 id="auth-title">Login</h2>
+                <form id="auth-form" class="space-y-5">
+                    <div>
+                        <!-- Label styling by style.css, mb-2 for spacing from Tailwind -->
+                        <label for="auth-username" class="block text-left mb-2">Username:</label>
+                        <!-- Input styling by .input-field in style.css -->
+                        <input type="text" id="auth-username" required class="input-field">
+                    </div>
+                    <div>
+                        <label for="auth-password" class="block text-left mb-2">Password:</label>
+                        <input type="password" id="auth-password" required class="input-field">
+                    </div>
+                    <!-- Button styling by .btn-primary in style.css, w-full for full width from Tailwind -->
+                    <button type="submit" id="auth-submit-btn" class="btn-primary w-full">Login</button>
+                </form>
+                <!-- Text styling by .auth-toggle-text in style.css, mt-6 for spacing from Tailwind -->
+                <p class="auth-toggle-text mt-6">
+                    Don't have an account? 
+                    <!-- Link styling by .auth-toggle-link in style.css, ml-1 for spacing from Tailwind -->
+                    <span id="auth-toggle-link" class="auth-toggle-link ml-1">Register here.</span>
                 </p>
-            </form>
-        </div>
-    </main>
-
-    <!-- Main Kanban Board View -->
-    <main id="board-view" class="flex-1 flex flex-col p-4 hidden">
-        <header class="text-center mb-6">
-            <h1 class="text-3xl font-bold text-white mb-2">Welcome, <span id="welcome-username"></span>!</h1>
-            <p id="app-status-message" class="message mt-2 hidden"></p>
-        </header>
-
-        <!-- Kanban Board Container -->
-        <section id="kanban-board-container" class="kanban-board-container flex-1"></section>
-
-        <!-- Fixed Buttons (Add Card, Add Category) -->
-        <div class="fixed-bottom-right">
-            <button id="add-card-btn" class="btn-primary">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-circle inline-block mr-2"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>
-                Add Task
-            </button>
-            <button id="add-category-btn" class="btn-primary">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-plus inline-block mr-2"><path d="M11 17h4"/><path d="M13 15v4"/><path d="M20 9.5V8a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h5.5"/><path d="M19 20a2 2 0 1 0 4 0 2 2 0 1 0-4 0"/><path d="M17.5 18.5 22 14"/></svg>
-                Add Category
-            </button>
+                <!-- Message styling by .message, .error-message/.success-message in style.css, mt-4 for spacing -->
+                <p id="auth-message" class="message mt-4"></p>
+            </div>
         </div>
 
-        <!-- Fixed Top-Right Group (Logout, Settings) -->
-        <div class="fixed-top-right-group">
-            <button id="settings-btn" class="settings-icon-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.78 1.22a2 2 0 0 0 .73 2.73l.15.08a2 2 0 0 1 1 1.73v.44a2 2 0 0 0 2 2v.18a2 2 0 0 1 1 1.73l.43.25a2 2 0 0 1 2 0l.15-.08a2 2 0 0 0 2.73.73l.78 1.22a2 2 0 0 0-.73 2.73l-.15.08a2 2 0 0 1-1 1.73v.44a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.78-1.22a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.73v-.44a2 2 0 0 0-2-2v-.18a2 2 0 0 1-1-1.73l-.43-.25a2 2 0 0 1-2 0l-.15.08a2 2 0 0 0-2.73-.73l-.78-1.22a2 2 0 0 0 .73-2.73l.15-.08A2 2 0 0 1 12.22 2z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-            <button id="logout-btn" class="btn-secondary">Logout</button>
-        </div>
-    </main>
-
-    <!-- Modals -->
-
-    <!-- Add Category Modal -->
-    <div id="add-category-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-button" data-modal="add-category-modal">&times;</span>
-            <h2>Add New Category</h2>
-            <form id="add-category-form">
-                <label for="new-category-name">Category Name:</label>
-                <input type="text" id="new-category-name" class="input-field" required>
-                <p id="add-category-message" class="message mt-2 hidden"></p>
-                <button type="submit" class="btn-primary mt-6">Add Category</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Add/Edit Card Modal -->
-    <div id="add-edit-card-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-button" data-modal="add-edit-card-modal">&times;</span>
-            <h2 id="card-modal-title">Add New Task</h2>
-            <form id="card-form">
-                <div class="mb-4">
-                    <label for="card-title-input" class="input-label">Task Title</label>
-                    <input type="text" id="card-title-input" class="input-field" required>
+        <!-- Kanban Board View (Hidden initially, shown after login) -->
+        <div id="board-view" class="hidden p-4 min-h-screen flex flex-col">
+            <header class="text-center mb-6 relative">
+                <h1 class="text-4xl font-extrabold text-white mb-2 tracking-wide drop-shadow-lg">
+                    TaskFlow Board
+                </h1>
+                <p class="text-lg font-light text-gray-400 max-w-xl mx-auto">
+                    Welcome, <span id="welcome-username"></span>! Organize and track your tasks efficiently.
+                </p>
+                <!-- Fixed top-right container for both logout and settings -->
+                <div class="fixed-top-right-group">
+                    <button id="logout-btn" class="btn-secondary py-2 px-4 text-sm mr-2">
+                        Logout
+                    </button>
+                    <button id="settings-btn" class="settings-icon-btn" title="Settings">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.08.15a2 2 0 0 1 0 2l-.15.08a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.08-.15a2 2 0 0 1 0-2l.15-.08a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
                 </div>
-                <div class="mb-4">
-                    <label for="card-description-input" class="input-label">Description</label>
-                    <textarea id="card-description-input" class="input-field" rows="3" required></textarea>
-                </div>
-                <div class="mb-4">
-                    <label for="card-category-select" class="input-label">Category</label>
-                    <select id="card-category-select" class="input-field" required></select>
-                </div>
-                <p id="card-form-message" class="message mt-2 hidden"></p>
-                <button type="submit" id="card-submit-btn" class="btn-primary mt-6">Add Task</button>
-            </form>
+            </header>
+
+            <p id="app-status-message" class="text-center p-3 rounded-lg mb-4 hidden"></p>
+
+            <div id="kanban-board-container" class="kanban-board-container flex-grow">
+                <!-- Kanban columns and cards will be rendered here by script.js -->
+            </div>
+
+            <!-- Fixed Action Buttons -->
+            <div class="fixed-bottom-right">
+                <button id="add-card-btn" class="btn-primary" disabled>
+                    + Add Card
+                </button>
+                <button id="add-category-btn" class="btn-primary">
+                    + Add Category
+                </button>
+            </div>
         </div>
-    </div>
 
-    <!-- Settings Modal -->
-    <div id="settings-modal" class="modal">
-        <div class="modal-content settings-modal-content-new">
-            <span class="close-button" data-modal="settings-modal">&times;</span>
-            <h2>Settings</h2>
-
-            <div class="tabs-container">
-                <div class="tab-buttons">
-                    <button class="tab-button active" data-tab-id="account-info-tab">Account</button>
-                    <button class="tab-button" data-tab-id="username-tab">Username</button>
-                    <button class="tab-button" data-tab-id="password-tab">Password</button>
-                    <button class="tab-button" data-tab-id="discord-tab">Discord</button>
-                </div>
-
-                <div id="account-info-tab" class="tab-content active-tab-content">
-                    <h3>Your Account Info</h3>
-                    <div class="info-group">
-                        <p class="settings-info-line">Current User: <span id="settings-username-display"></span></p>
-                        <p class="settings-info-line">User ID: <span id="settings-user-id-display"></span></p>
+        <!-- Modals: All modals are defined directly in index.html for simplicity in vanilla JS -->
+        <!-- Add Category Modal -->
+        <div id="add-category-modal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close-button" data-modal="add-category-modal">&times;</span>
+                <h2>Add New Category</h2>
+                <form id="add-category-form" class="space-y-4">
+                    <div>
+                        <label for="new-category-name" class="block text-left mb-2">Category Name:</label>
+                        <input type="text" id="new-category-name" required class="input-field">
                     </div>
-                     <!-- New Admin Panel Button - Hidden by default -->
-                    <button id="admin-panel-btn" class="btn-primary mt-6 hidden">Admin Panel</button>
-                </div>
+                    <button type="submit" class="btn-primary w-full">Add Category</button>
+                    <p id="add-category-message" class="message mt-2"></p>
+                </form>
+            </div>
+        </div>
 
-                <div id="username-tab" class="tab-content hidden">
-                    <h3>Update Username</h3>
-                    <form id="update-username-form">
-                        <div class="mb-4">
-                            <label for="settings-new-username" class="input-label">New Username</label>
-                            <input type="text" id="settings-new-username" class="input-field" required autocomplete="username">
+        <!-- Add/Edit Card Modal -->
+        <div id="add-edit-card-modal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close-button" data-modal="add-edit-card-modal">&times;</span>
+                <h2 id="card-modal-title">Add New Task</h2>
+                <form id="card-form" class="space-y-4">
+                    <div>
+                        <label for="card-title-input" class="block text-left mb-2">Task Title:</label>
+                        <input type="text" id="card-title-input" required class="input-field">
+                    </div>
+                    <div>
+                        <label for="card-description-input" class="block text-left mb-2">Description:</label>
+                        <textarea id="card-description-input" rows="4" class="input-field"></textarea>
+                    </div>
+                    <div>
+                        <label for="card-category-select" class="block text-left mb-2">Category:</label>
+                        <select id="card-category-select" required class="input-field"></select>
+                    </div>
+                    <button type="submit" id="card-submit-btn" class="btn-primary w-full">Add Task</button>
+                    <p id="card-form-message" class="message mt-2"></p>
+                </form>
+            </div>
+        </div>
+
+        <!-- Settings Modal (Redesigned with Tabs) -->
+        <div id="settings-modal" class="modal hidden">
+            <div class="modal-content settings-modal-content-new">
+                <span class="close-button" data-modal="settings-modal">&times;</span>
+                <h2>Settings</h2>
+
+                <div class="tabs-container">
+                    <div class="tab-buttons">
+                        <button class="tab-button active" data-tab-id="account-info-tab">Account</button>
+                        <button class="tab-button" data-tab-id="username-tab">Username</button>
+                        <button class="tab-button" data-tab-id="password-tab">Password</button>
+                        <button class="tab-button" data-tab-id="discord-tab">Discord</button>
+                    </div>
+
+                    <div id="account-info-tab" class="tab-content active">
+                        <h3>Your Account Info</h3>
+                        <div class="info-group">
+                            <p class="settings-info-line">Current User:</p>
+                            <span id="settings-username-display" class="font-semibold text-emerald-400"></span>
                         </div>
-                        <p id="username-update-message" class="message mt-2 hidden"></p>
-                        <button type="submit" class="btn-primary mt-6">Update Username</button>
-                    </form>
-                </div>
-
-                <div id="password-tab" class="tab-content hidden">
-                    <h3>Update Password</h3>
-                    <form id="update-password-form">
-                        <div class="mb-4">
-                            <label for="settings-old-password" class="input-label">Old Password</label>
-                            <input type="password" id="settings-old-password" class="input-field" required autocomplete="current-password">
+                        <div class="info-group">
+                            <p class="settings-info-line text-sm">User ID:</p>
+                            <span id="settings-user-id-display" class="font-mono text-gray-400 text-sm"></span>
                         </div>
-                        <div class="mb-4">
-                            <label for="settings-new-password" class="input-label">New Password</label>
-                            <input type="password" id="settings-new-password" class="input-field" required autocomplete="new-password">
-                        </div>
-                        <p id="password-update-message" class="message mt-2 hidden"></p>
-                        <button type="submit" class="btn-primary mt-6">Update Password</button>
-                    </form>
-                </div>
-
-                <div id="discord-tab" class="tab-content hidden">
-                    <h3>Discord Integration</h3>
-                    <div class="info-group">
-                        <p class="settings-discord-status text-center mb-4" id="settings-discord-status">Discord Not Connected</p>
                     </div>
-                    <p id="discord-connect-message" class="message mt-2 hidden"></p>
-                    <button type="button" id="connect-discord-btn" class="btn-primary mt-6">Connect Discord</button>
-                </div>
-            </div>
 
-            <button id="settings-logout-btn" class="btn-secondary mt-8">Logout</button>
-        </div>
-    </div>
-
-    <!-- Confirmation Modal -->
-    <div id="confirmation-modal" class="modal">
-        <div class="modal-content confirmation-modal-content">
-            <span class="close-button" data-modal="confirmation-modal">&times;</span>
-            <p id="confirmation-message" class="text-lg mb-6 text-white"></p>
-            <div class="modal-actions">
-                <button id="confirm-action-btn" class="modal-btn confirm-btn">Confirm</button>
-                <button id="cancel-action-btn" class="modal-btn cancel-btn">Cancel</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Card Options Menu (Right-click/ellipsis menu) -->
-    <div id="card-options-menu" class="card-options-menu hidden">
-        <button id="edit-card-menu-item" class="menu-item">Edit Task</button>
-        <button id="delete-card-menu-item" class="menu-item">Delete Task</button>
-    </div>
-
-
-    <!-- NEW: Admin Panel Modal -->
-    <div id="admin-panel-modal" class="modal">
-        <div class="modal-content admin-modal-content">
-            <span class="close-button" data-modal="admin-panel-modal">&times;</span>
-            <h2>Admin Panel</h2>
-
-            <!-- Admin Step 1: User ID Input -->
-            <div id="admin-step-1" class="admin-panel-step active-admin-step">
-                <h3>Enter User ID</h3>
-                <div class="mb-4">
-                    <label for="admin-user-id-input" class="input-label">User's MongoDB ID</label>
-                    <input type="text" id="admin-user-id-input" class="input-field" placeholder="e.g., 65f3a7c8b9d0e1f2a3b4c5d6">
-                </div>
-                <p id="admin-step-1-message" class="message mt-2 hidden"></p>
-                <button type="button" id="admin-next-btn" class="btn-primary mt-6">Next</button>
-            </div>
-
-            <!-- Admin Step 2: User Management -->
-            <div id="admin-step-2" class="admin-panel-step hidden">
-                <h3>Manage User: <span id="admin-managed-username"></span></h3>
-                <div class="info-group">
-                    <p class="settings-info-line">User ID: <span id="admin-managed-user-id"></span></p>
-                    <p class="settings-info-line">Discord ID: <span id="admin-managed-discord-id">N/A</span></p>
-                    <p class="settings-info-line">Discord Username: <span id="admin-managed-discord-username">N/A</span></p>
-                </div>
-
-                <p id="admin-step-2-message" class="message mt-2 hidden"></p>
-
-                <!-- Admin Actions: Username -->
-                <div class="admin-action-section">
-                    <h4>Change Username</h4>
-                    <form id="admin-update-username-form" class="flex flex-col gap-4">
-                        <input type="text" id="admin-new-username-input" class="input-field" placeholder="New Username" required>
-                        <p id="admin-username-update-message" class="message mt-0 hidden"></p>
-                        <button type="submit" class="btn-secondary">Update Username</button>
-                    </form>
-                </div>
-
-                <!-- Admin Actions: Password Reset -->
-                <div class="admin-action-section">
-                    <h4>Reset Password</h4>
-                    <form id="admin-reset-password-form" class="flex flex-col gap-4">
-                        <input type="password" id="admin-new-password-input" class="input-field" placeholder="New Password" required autocomplete="new-password">
-                        <p id="admin-password-reset-message" class="message mt-0 hidden"></p>
-                        <button type="submit" class="btn-secondary">Reset Password</button>
-                    </form>
-                </div>
-
-                <!-- Admin Actions: Manage Categories -->
-                <div class="admin-action-section">
-                    <h4>Manage Categories</h4>
-                    <p id="admin-categories-message" class="message mt-0 hidden"></p>
-                    <div id="admin-categories-list" class="admin-data-list">
-                        <!-- Categories will be loaded here -->
+                    <div id="username-tab" class="tab-content hidden">
+                        <h3>Change Username</h3>
+                        <form id="update-username-form" class="space-y-4">
+                            <div>
+                                <label for="settings-new-username" class="block text-left mb-2">New Username:</label>
+                                <input type="text" id="settings-new-username" required class="input-field">
+                            </div>
+                            <button type="submit" class="btn-primary w-full">Update Username</button>
+                            <p id="username-update-message" class="message mt-2"></p>
+                        </form>
                     </div>
-                    <form id="admin-add-category-form" class="flex flex-col gap-4 mt-4">
-                        <input type="text" id="admin-add-category-input" class="input-field" placeholder="New Category Name" required>
-                        <button type="submit" class="btn-secondary">Add Category</button>
-                    </form>
-                </div>
 
-                <!-- Admin Actions: Manage Tasks -->
-                <div class="admin-action-section">
-                    <h4>Manage Tasks</h4>
-                    <p id="admin-tasks-message" class="message mt-0 hidden"></p>
-                    <div id="admin-tasks-list" class="admin-data-list">
-                        <!-- Tasks will be loaded here -->
+                    <div id="password-tab" class="tab-content hidden">
+                        <h3>Change Password</h3>
+                        <form id="update-password-form" class="space-y-4">
+                            <div>
+                                <label for="settings-old-password" class="block text-left mb-2">Old Password:</label>
+                                <input type="password" id="settings-old-password" required class="input-field">
+                            </div>
+                            <div>
+                                <label for="settings-new-password" class="block text-left mb-2">New Password:</label>
+                                <input type="password" id="settings-new-password" required class="input-field">
+                            </div>
+                            <button type="submit" class="btn-primary w-full">Update Password</button>
+                            <p id="password-update-message" class="message mt-2"></p>
+                        </form>
                     </div>
-                    <form id="admin-add-task-form" class="flex flex-col gap-4 mt-4">
-                        <input type="text" id="admin-add-task-title-input" class="input-field" placeholder="New Task Title" required>
-                        <input type="text" id="admin-add-task-desc-input" class="input-field" placeholder="New Task Description" required>
-                        <select id="admin-add-task-category-select" class="input-field" required></select>
-                        <button type="submit" class="btn-secondary">Add Task</button>
-                    </form>
-                </div>
 
-                <!-- Admin Actions: Delete User -->
-                <div class="admin-action-section mt-8">
-                    <h4>Danger Zone</h4>
-                    <p class="text-red-400 text-sm mb-4">Deleting a user will permanently remove their account and all associated categories and tasks.</p>
-                    <button type="button" id="admin-delete-user-btn" class="btn-danger w-full">Delete User</button>
+                    <div id="discord-tab" class="tab-content hidden">
+                        <h3>Discord Integration</h3>
+                        <p id="settings-discord-status" class="text-center font-semibold mb-4"></p>
+                        <button id="connect-discord-btn" class="btn-primary w-full">Connect Discord</button>
+                        <p id="discord-connect-message" class="message mt-2"></p>
+                    </div>
                 </div>
-
-                <button type="button" id="admin-back-to-id-input-btn" class="btn-secondary mt-8">Back to ID Input</button>
+                
+                <button id="settings-logout-btn" class="btn-secondary w-full mt-6">Logout</button>
             </div>
         </div>
+
+        <!-- Confirmation Modal -->
+        <div id="confirmation-modal" class="modal hidden">
+            <div class="modal-content confirmation-modal-content">
+                <h2>Confirm Action</h2>
+                <p id="confirmation-message" class="mb-6">Are you sure?</p>
+                <div class="modal-actions">
+                    <button id="confirm-action-btn" class="modal-btn confirm-btn">Confirm</button>
+                    <button id="cancel-action-btn" class="modal-btn cancel-btn">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card Options Menu -->
+        <div id="card-options-menu" class="card-options-menu hidden">
+            <button class="menu-item" id="edit-card-menu-item">Edit</button>
+            <button class="menu-item" id="delete-card-menu-item">Delete</button>
+        </div>
+
     </div>
 
-
+    <!-- Link to your JavaScript -->
     <script src="script.js"></script>
 </body>
 </html>

@@ -2586,7 +2586,6 @@
 //     console.log('DOMContentLoaded: Initialization complete.');
 // });
 
-
 // --- Global DOM Element References (cached for performance) ---
 const API_BASE_URL = 'https://taskfllow.onrender.com/api'; // Your deployed Render backend API URL
 
@@ -3268,7 +3267,7 @@ function createCardElement(cardData) {
 
     const optionsButton = card.querySelector('.options-btn');
     optionsButton.addEventListener('click', (e) => {
-        e.stopPropagation();
+        e.stopPropagation(); // <--- THIS IS THE FIX: Stop the click from propagating!
         showCardOptionsMenu(cardData, optionsButton);
     });
 
@@ -3460,16 +3459,18 @@ let activeCardOptionsMenuButton = null;
 
 function showCardOptionsMenu(cardData, buttonElement) {
     console.log('showCardOptionsMenu: Showing options for card:', cardData._id);
-    hideCardOptionsMenu();
+    hideCardOptionsMenu(); // Ensure any previous menu is hidden
 
     activeCardOptionsMenuButton = buttonElement;
     currentEditingCardId = cardData._id;
 
     const rect = buttonElement.getBoundingClientRect();
+    // Position the menu relative to the button
     cardOptionsMenu.style.top = `${rect.bottom + 5}px`;
     cardOptionsMenu.style.left = `${rect.left}px`;
     cardOptionsMenu.classList.add('show');
 
+    // Set up click handlers for menu items
     editCardMenuItem.onclick = () => {
         openAddEditCardModal(cardData);
         hideCardOptionsMenu();
@@ -3479,6 +3480,8 @@ function showCardOptionsMenu(cardData, buttonElement) {
         hideCardOptionsMenu();
     };
 
+    // Add a delayed event listener to the document to close the menu
+    // This delay prevents the *current* click (that opened the menu) from closing it immediately
     setTimeout(() => {
         document.addEventListener('click', handleClickOutsideCardOptionsMenu, { capture: true });
     }, 0);
@@ -3493,12 +3496,15 @@ function hideCardOptionsMenu() {
 }
 
 function handleClickOutsideCardOptionsMenu(event) {
+    // If the click is inside the options menu OR on the button that opened it, do nothing (don't hide)
     if (
-        !cardOptionsMenu.contains(event.target) &&
-        activeCardOptionsMenuButton && activeCardOptionsMenuButton.contains(event.target)
+        cardOptionsMenu.contains(event.target) ||
+        (activeCardOptionsMenuButton && activeCardOptionsMenuButton.contains(event.target))
     ) {
-        hideCardOptionsMenu();
+        return;
     }
+    // Otherwise, hide the menu
+    hideCardOptionsMenu();
 }
 
 
@@ -3508,7 +3514,7 @@ let draggedCardElement = null;
 
 function handleDragStart(event) {
     if (event.target.closest('.options-btn')) {
-        event.preventDefault();
+        event.preventDefault(); // Prevent drag if clicking options button
         return;
     }
     draggedCardElement = event.currentTarget;
@@ -3551,8 +3557,25 @@ async function handleDrop(event) {
 
         if (oldCategory !== newCategory) {
             console.log(`handleDrop: Moving card ${cardId} from ${oldCategory} to ${newCategory}`);
+
+            // Find the full card data from the local 'cards' array
+            const cardToUpdate = cards.find(card => card._id === cardId);
+
+            if (!cardToUpdate) {
+                console.error(`handleDrop: Card with ID ${cardId} not found in local state.`);
+                showAppStatusMessage(`Error: Could not find card to move. Please refresh.`, 'error');
+                return;
+            }
+
+            // Create the data payload for the API call, ensuring all required fields are sent
+            const updatePayload = {
+                title: cardToUpdate.title,
+                description: cardToUpdate.description,
+                category: newCategory // This is the only field that changes
+            };
+
             try {
-                await apiCall(`/cards/${cardId}`, 'PUT', { category: newCategory });
+                await apiCall(`/cards/${cardId}`, 'PUT', updatePayload); // Send the full payload
                 showAppStatusMessage(`Card moved to ${newCategory}!`, 'success');
                 fetchCategoriesAndCards();
                 console.log('handleDrop: Card move successful.');
@@ -3628,7 +3651,7 @@ async function handleAdminEnterUserId() {
         adminManagedUsername.textContent = adminManagedUser.username;
         adminManagedUserId.textContent = adminManagedUser._id;
         adminManagedDiscordId.textContent = adminManagedUser.discordId || 'N/A';
-        adminManagedDiscordUsername.textContent = adminManagedUser.discordUsername ? `${adminManagedUser.discordUsername}#${adminManagedUser.discordDiscriminator || 'XXXX'}` : 'N/A';
+        adminManagedDiscordUsername.textContent = adminManagedUser.discordUsername ? `${adminManagedUser.discordUsername}#${adminManagedUser.discordDiscriminator || 'XXXX'}` : 'N/A'; // Corrected discriminator access
 
         // Clear messages for admin step 2 forms
         showMessage(adminStep2Message, '', 'hidden', 0);
@@ -3837,7 +3860,8 @@ async function loadAdminManagedUserCards() {
             });
         }
         showMessage(adminTasksMessage, '', 'hidden', 0);
-    } catch (error) {
+    }
+     catch (error) {
         console.error('loadAdminManagedUserCards: Error fetching cards:', error);
         showMessage(adminTasksMessage, `Error loading tasks: ${error.message}`, 'error');
     }
@@ -4104,9 +4128,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', (event) => {
         const target = event.target;
         const isClickInsideMenu = cardOptionsMenu.contains(target);
-        const isClickOnToggleButton = activeCardOptionsMenuButton && activeCardOptionsMenuButton.contains(target);
-
-        if (cardOptionsMenu.classList.contains('show') && !isClickInsideMenu && !isClickOnToggleButton) {
+        // Do NOT use activeCardOptionsMenuButton.contains(target) here for the root document listener,
+        // as the initial click on the button is what opened the menu.
+        // We already stopped propagation on the optionsButton click, so the initial click won't reach here.
+        // This listener is for subsequent clicks *away* from the menu.
+        if (cardOptionsMenu.classList.contains('show') && !isClickInsideMenu) {
             hideCardOptionsMenu();
         }
     });
